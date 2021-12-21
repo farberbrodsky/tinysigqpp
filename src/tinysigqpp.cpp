@@ -1,4 +1,5 @@
 #include "tinysigqpp.hpp"
+#include <unistd.h>
 #include <iostream>  // TODO: remove this, debug-by-printing only
 #include <functional>
 using namespace tinysigqpp;
@@ -19,7 +20,8 @@ void *basic_tinysigqpp::signal_receiver_thread(void *arg) {
     return nullptr;
 }
 
-void basic_tinysigqpp::add_to_queue(siginfo_t sig) {
+// basic version returns whether it was added to the actual queue or not
+bool basic_tinysigqpp::add_to_queue(siginfo_t sig) {
     // go over all kill_mes for a match, anything that matches gets the signal
     bool matches_any_kill_me = false;
     if (pthread_mutex_lock(&this->kill_me_list_lock)) throw std::runtime_error { "Can't lock mutex" };
@@ -43,7 +45,7 @@ void basic_tinysigqpp::add_to_queue(siginfo_t sig) {
 
     pthread_mutex_unlock(&this->kill_me_list_lock);
 
-    if (matches_any_kill_me) return;
+    if (matches_any_kill_me) return false;
 
     // otherwise, add it to the signal list
     if (pthread_mutex_lock(&this->signals_lock)) throw std::runtime_error { "Can't lock mutex" };
@@ -56,6 +58,7 @@ void basic_tinysigqpp::add_to_queue(siginfo_t sig) {
     }
 
     pthread_mutex_unlock(&this->signals_lock);
+    return true;
 }
 
 bool basic_tinysigqpp::get_signal(siginfo_t *sig) {
@@ -134,4 +137,16 @@ void kill_me::cancel() {
     }
 
     pthread_mutex_unlock(&parent.kill_me_list_lock);
+}
+
+
+// tinysigqpp_eventfd - notifies you using an eventfd instead of a signal
+tinysigqpp_eventfd::tinysigqpp_eventfd(int eventfd) : eventfd { eventfd } {}
+bool tinysigqpp_eventfd::add_to_queue(siginfo_t sig) {
+    bool res = basic_tinysigqpp::add_to_queue(sig);
+    if (res) {
+        uint64_t one = 1;
+        write(this->eventfd, &one, sizeof(one));
+    }
+    return res;
 }

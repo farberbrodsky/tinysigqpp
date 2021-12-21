@@ -1,3 +1,4 @@
+#include <sys/eventfd.h>
 #include "tinysigqpp.hpp"
 #include <ctime>
 #include <iostream>
@@ -5,7 +6,7 @@
 using namespace tinysigqpp;
 
 int main() {
-    basic_tinysigqpp sig_queue;
+    basic_tinysigqpp sig_queue {};
 
     kill_me k1 { sig_queue, [](siginfo_t sig)  {
         return sig.si_signo == SIGINT;

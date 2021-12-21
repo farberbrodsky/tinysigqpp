@@ -17,7 +17,7 @@ namespace tinysigqpp {
         // Sets a signal mask for the whole process, creates the signal catching thread
         basic_tinysigqpp();
         // Should only be called when the process is done
-        ~basic_tinysigqpp();
+        virtual ~basic_tinysigqpp();
 
         basic_tinysigqpp(const basic_tinysigqpp &) = delete;              // no copy
         basic_tinysigqpp &operator=(const basic_tinysigqpp &) = delete;   // no copy
@@ -29,7 +29,7 @@ namespace tinysigqpp {
 
     protected:
         // Different implementations of this can exist - e.g. one that updates an eventfd
-        virtual void add_to_queue(siginfo_t sig);
+        virtual bool add_to_queue(siginfo_t sig);
 
     private:
         static void *signal_receiver_thread(void *);
@@ -57,10 +57,21 @@ namespace tinysigqpp {
         unsigned int signal_count[64];  // counter of each signal in the queue, used for e.g. checking whether SIGKILL was set at all
     };
 
-    /*
-    class tinysigqpp_eventfd : public tinysigqpp {
+    class tinysigqpp_eventfd : public basic_tinysigqpp {
+    public:
+        explicit tinysigqpp_eventfd(int eventfd);
+        ~tinysigqpp_eventfd() override = default;
+
+        tinysigqpp_eventfd(const basic_tinysigqpp &) = delete;              // no copy
+        tinysigqpp_eventfd &operator=(const basic_tinysigqpp &) = delete;   // no copy
+        tinysigqpp_eventfd(basic_tinysigqpp &&) = delete;                   // no move
+        tinysigqpp_eventfd &operator=(const basic_tinysigqpp &&) = delete;  // no move
+
+    protected:
+        bool add_to_queue(siginfo_t sig) override;
+    private:
+        int eventfd;
     };
-    */
 
     // Used to set/unset a "kill me" which is a signal you want to be interrupted for, multiple threads can get one signal this way
     class kill_me {
