@@ -1,0 +1,101 @@
+Checks: >
+    *,
+     
+    -abseil-*,
+    -altera-*,
+    -android-*,
+    -darwin-*,
+    -fuchsia-*,
+    -google-*,
+    -linuxkernel-*,
+    -llvm-*,
+    -llvmlibc-*,
+    -mpi-*,
+    -objc-*,
+    -zircon-*,
+     
+    -cert-dcl21-cpp,
+    -cert-dcl50-cpp,
+    -cert-err58-cpp,
+    -concurrency-mt-unsafe,
+    -clang-analyzer-core.CallAndMessage,
+    -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+    -clang-analyzer-security.insecureAPI.strcpy,
+    -cppcoreguidelines-init-variables,
+    -cppcoreguidelines-owning-memory,
+    -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+    -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+    -cppcoreguidelines-pro-bounds-constant-array-index,
+    -cppcoreguidelines-pro-type-vararg,
+    -cppcoreguidelines-pro-type-member-init,
+    -cppcoreguidelines-pro-type-union-access,
+    -cppcoreguidelines-pro-type-reinterpret-cast,
+    -misc-non-private-member-variables-in-classes,
+    -modernize-use-nodiscard,
+    -modernize-avoid-c-arrays,
+    -modernize-use-trailing-return-type,
+    -readability-implicit-bool-conversion,
+    -readability-magic-numbers,
+    -readability-named-parameter,
+    -readability-uppercase-literal-suffix,
+    -readability-braces-around-statements,
+     
+    -cppcoreguidelines-avoid-c-arrays,
+    -cppcoreguidelines-avoid-magic-numbers,
+    -cppcoreguidelines-non-private-member-variables-in-classes,
+    -hicpp-avoid-c-arrays,
+    -hicpp-named-parameter,
+    -hicpp-braces-around-statements,
+    -hicpp-deprecated-headers,
+    -hicpp-member-init,
+    -hicpp-no-array-decay,
+    -hicpp-no-malloc,
+    -hicpp-uppercase-literal-suffix,
+    -hicpp-use-auto,
+    -hicpp-use-nullptr,
+    -hicpp-vararg
+ 
+CheckOptions:
+    - key: bugprone-narrowing-conversions.WarnOnFloatingPointNarrowingConversion
+      value: false
+     
+    - key: readability-identifier-naming.LocalVariableCase
+      value: lower_case
+     
+    - key: readability-identifier-naming.MemberCase
+      value: lower_case
+     
+    - key: readability-identifier-naming.MacroDefinitionCase
+      value: UPPER_CASE
+ 
+# Check list https://clang.llvm.org/extra/clang-tidy/checks/list.html
+# The last group of disabled checks are just aliases, if enabled, they produce duplicate warnings
+ 
+# Disabled:
+# cert-dcl21-cpp ; Post-{in,de}crement operators should return const type
+# cert-dcl50-cpp ; Don't use variadic functions
+# clang-analyzer-core.CallAndMessage ; Tries to find problematic calls like `p->f()` where `p` might be null, but has too many false positives
+# clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling ; Shills the *_s versions of C API, e.g. `snprintf_s` instead of `snprintf`
+# cppcoreguidelines-init-variables ; All scalar type variables should be initialised in their declaration
+# cppcoreguidelines-pro-bounds-constant-array-index ; Don't allow indexing an array with a variable
+# cppcoreguidelines-pro-bounds-pointer-arithmetic ; Don't use pointer arithmetic. Finds e.g. the expression `&arr[i]`
+# cppcoreguidelines-pro-type-vararg ; Don't call variadic functions like printf
+# llvm-include-order ; LLVM project coding standard header ordering
+# misc-non-private-member-variables-in-classes ; Don't use protected variables
+# modernize-use-nodiscard ; Add [[nodiscard]] to all pure functions
+# modernize-use-trailing-return-type ; Use alternative syntax for function declarations
+# readability-implicit-bool-conversion ; Don't use implicit conversion to bool. Finds e.g. `if (ptr)`
+# readability-named-parameter ; All parameters, even if unused, should have names
+# readability-uppercase-literal-suffix ; Suffices like `3u` should be written uppercase like `3U`
+ 
+# In an ideal world:
+# cert-err58-cpp ; Don't allow initialisation of globals et al to throw
+# cppcoreguidelines-owning-memory ; Owning raw pointers should be decorated with `gsl::owner`
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay ; Don't allow array->pointer decay conversion
+ 
+# Maybe:
+# cert-env33-c ; Don't use `system`
+# clang-analyzer-security.insecureAPI.strcpy ; Don't use `strcpy` / `strcat`, but suggests non-portable `strlcpy` / `strlcat`
+# modernize-use-auto ; Use `auto` for declarations where the type would otherwise be written twice (casts, new expressions) and for iterators
+# modernize-use-using ; Use `using` for type alias declarations, rather than `typedef`
+# readability-magic-numbers ; Don't use numeric literals. Finds e.g. the expression `x >> 8 & 0xFF` to have two magic numbers
